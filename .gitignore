@@ -1,4 +1,4 @@
 # ignore following files
 data/
 results/
-*.jar
+./*.jar
