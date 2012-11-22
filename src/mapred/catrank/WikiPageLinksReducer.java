@@ -2,26 +2,25 @@ package mapred.catrank;
 
 import java.io.IOException;
 import java.util.Iterator;
-
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapred.Reporter;
-
 
 public class WikiPageLinksReducer extends Reducer<Text, Text, Text, Text> {
     
-    public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
-        String pagerank = "1.0\t";
-
-        boolean first = true;
-        while(values.hasNext()){
-            if(!first) pagerank += ",";
-            
-            pagerank += values.next().toString();
-            first = false;
+    protected void reduce(Text key, Iterable<Text> values, Context context) 
+    		throws IOException, InterruptedException {
+        
+    	String pagelinks = "1.0\t";
+    	Iterator<Text> iter = values.iterator();  	
+    	
+        if (iter.hasNext()) pagelinks += iter.next().toString();
+           
+        while(iter.hasNext()){
+            pagelinks += ",";      
+            pagelinks += iter.next().toString();
         }
         
-        output.collect(key, new Text(pagerank));
+        // output: pageA   1.0   pageB,pageC,pageN
+        context.write(key, new Text(pagelinks));
     }
 }

@@ -20,7 +20,7 @@
   <path id="classpath">
     <pathelement location="lib/hadoop-core-1.0.3.jar"/>
     <pathelement location="lib/commons-cli-1.2.jar"/>
-    <pathelement location="lib/mahout-core-0.4.jar"/>
+    <pathelement location="lib/commons-logging-1.1.1.jar"/>
   </path>
 
   <!-- Initialize the build and create the directory -->

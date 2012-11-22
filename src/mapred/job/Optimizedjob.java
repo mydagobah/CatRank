@@ -11,6 +11,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.ClusterStatus;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -60,7 +61,7 @@ public class Optimizedjob extends Job {
 		int reducer_capacity = cluster_status.getMaxReduceTasks();
 
 		// IO format
-		setInputFormatClass(TextInputFormat.class);
+		//setInputFormatClass(TextInputFormat.class);
 		setOutputFormatClass(TextOutputFormat.class);
 
 		// Input file/dir
@@ -69,7 +70,8 @@ public class Optimizedjob extends Job {
 		TextOutputFormat.setOutputPath(this, new Path(output));
 
 		FileSystem fs = FileSystem.get(URI.create(output), conf);
-		fs.delete(new Path(output), true);
+		Path outpath = new Path(output);
+		if (fs.exists(outpath)) fs.delete(outpath, true);
 		// CommonFileOperations.rmr(output);
 
 		if (reduceJobs == 0)
@@ -82,6 +84,10 @@ public class Optimizedjob extends Job {
 
 	}
 
+	public void _setInputFormatClass(Class <? extends InputFormat<?,?>> cls) {
+		setInputFormatClass(cls);
+	}
+	
 	public void addInput(String input) {
 		inputs.add(input);
 	}

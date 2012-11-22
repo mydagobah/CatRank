@@ -1,10 +1,18 @@
 package mapred.catrank;
 
 import java.io.IOException;
+
 import mapred.job.Optimizedjob;
 import mapred.util.SimpleParser;
+import mapred.util.XmlInputFormat;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 public class Driver {
 
@@ -12,44 +20,57 @@ public class Driver {
 		SimpleParser parser = new SimpleParser(args);
 
 		String input = parser.get("input");
-		//String output = parser.get("output");
-		String tmpdir = parser.get("tmpdir");
+		String output = parser.get("output");
+		//String tmpdir = parser.get("tmpdir");
 
 		// job1
-		parseXml(input, tmpdir);
+		parseXml(input, output);
 		
 	}
 
 	private static void parseXml(String input, String output) 
 		throws IOException, ClassNotFoundException, InterruptedException {
-		Optimizedjob job = new Optimizedjob(new Configuration(), input, output,
-				"Get feature vector for hashtag #Job");
 		
+		Configuration conf = new Configuration();
+		
+		// setup deliminator of content to parse
+		conf.set(XmlInputFormat.START_TAG_KEY, "<page>");
+		conf.set(XmlInputFormat.END_TAG_KEY, "</page>");
+		//conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
+		
+		
+		// setup job
+		
+		Optimizedjob job = new Optimizedjob(conf, input, output, "Parse page info from xml files");
+		//FileInputFormat.setInputPaths(job, input);
+		job._setInputFormatClass(XmlInputFormat.class);
 		job.setClasses(WikiPageLinksMapper.class, WikiPageLinksReducer.class, null);
 		job.setMapOutputClasses(Text.class, Text.class);
 		job.setReduceJobs(1);
-
 		job.run();
-
+		
+		
 		/*
-		JobConf conf = new JobConf(WikiPageRanking.class);
-        
-        conf.set(XmlInputFormat.START_TAG_KEY, "<page>");
-        conf.set(XmlInputFormat.END_TAG_KEY, "</page>");
-        
-        // Input / Mapper
-        FileInputFormat.setInputPaths(conf, new Path(inputPath));
-        conf.setInputFormat(XmlInputFormat.class);
-        conf.setMapperClass(WikiPageLinksMapper.class);
-        
-        // Output / Reducer
-        FileOutputFormat.setOutputPath(conf, new Path(outputPath));
-        conf.setOutputFormat(TextOutputFormat.class);
-        conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(Text.class);
-        conf.setReducerClass(WikiLinksReducer.class);
-        
-        JobClient.runJob(conf);
-	*/
+		Job job = new Job(conf, "Parse page info from xml files");
+		//job.setJarByClass(Driver.class);
+		
+		FileInputFormat.setInputPaths(job, input);
+		job.setInputFormatClass(XmlInputFormat.class);
+		job.setMapperClass(WikiPageLinksMapper.class);
+		
+		Path outPath = new Path(output);
+		FileOutputFormat.setOutputPath(job, outPath);
+		job.setOutputFormatClass(TextOutputFormat.class);	
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(Text.class);
+		
+		job.setReducerClass(WikiPageLinksReducer.class);
+		//job.setNumReduceTasks(0);
+		
+		FileSystem dfs = FileSystem.get(outPath.toUri(), conf);
+		if (dfs.exists(outPath)) dfs.delete(outPath, true);
+		
+		job.waitForCompletion(true);
+		*/
 	}
 }

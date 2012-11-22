@@ -7,24 +7,26 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
-
 
 public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> {
     
     private static final Pattern wikiLinksPattern = Pattern.compile("\\[.+?\\]");
     
-    public void map(LongWritable key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+    /**
+     * key - KEYIN
+     * value - VALUEIN
+     */
+    protected void map(LongWritable key, Text value, Context context) 
+    		throws IOException, InterruptedException {
         
-        // Returns  String[0] = <title>[TITLE]</title>
-        //          String[1] = <text>[CONTENT]</text>
-        // !! without the <tags>.
+    	
+    	System.out.println(value.toString().substring(0, 6));
+    	
         String[] titleAndText = parseTitleAndText(value);
         
         String pageString = titleAndText[0];
-        if(notValidPage(pageString))
-            return;
+        
+        if(notValidPage(pageString)) return;
         
         Text page = new Text(pageString.replace(' ', '_'));
 
@@ -42,9 +44,10 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
                 continue;
             
             // add valid otherPages to the map.
-            output.collect(page, new Text(otherPage));
+            context.write(page, new Text(otherPage));
         }
     }
+    
     
     private boolean notValidPage(String pageString) {
         return pageString.contains(":");
@@ -66,7 +69,7 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
             endLink = part;
         }
         
-        aLink =  aLink.substring(start, endLink);
+        aLink = aLink.substring(start, endLink);
         aLink = aLink.replaceAll("\\s", "_");
         aLink = aLink.replaceAll(",", "");
         aLink = sweetify(aLink);
@@ -74,6 +77,12 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
         return aLink;
     }
     
+    /**
+     * replace &amp; chars to & in url
+     * 
+     * @param aLinkText
+     * @return
+     */
     private String sweetify(String aLinkText) {
         if(aLinkText.contains("&amp;"))
             return aLinkText.replace("&amp;", "&");
@@ -81,6 +90,15 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
         return aLinkText;
     }
 
+    /**
+     * Parse title and Text from given text 
+     * 
+     * @param value
+     * @return - String[0] = <title>[TITLE]</title>
+     * 			 String[1] = <text>[CONTENT]</text>
+     *   !! without the <tags>
+     * @throws CharacterCodingException
+     */
     private String[] parseTitleAndText(Text value) throws CharacterCodingException {
         String[] titleAndText = new String[2];
         
@@ -104,27 +122,33 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
         return titleAndText;
     }
 
+    /**
+     * check if the given link is a wikilink or not
+     * 
+     * @param aLink
+     * @return - true if given link is not a wiki link
+     *           false otherwise
+     */
     private boolean isNotWikiLink(String aLink) {
+    	if( aLink.contains(":")) return true; // Matches: external links and translations links
+        if( aLink.contains(",")) return true; // Matches: external links and translations links
+        if( aLink.contains("&")) return true;
+        
         int start = 1;
         if(aLink.startsWith("[[")){
             start = 2;
         }
-        
         if( aLink.length() < start+2 || aLink.length() > 100) return true;
-        char firstChar = aLink.charAt(start);
-        
-        if( firstChar == '#') return true;
-        if( firstChar == ',') return true;
-        if( firstChar == '.') return true;
-        if( firstChar == '&') return true;
+  
+        char firstChar = aLink.charAt(start);  
+        if( firstChar == '#')  return true;
+        if( firstChar == ',')  return true;
+        if( firstChar == '.')  return true;
+        if( firstChar == '&')  return true;
         if( firstChar == '\'') return true;
-        if( firstChar == '-') return true;
-        if( firstChar == '{') return true;
-        
-        if( aLink.contains(":")) return true; // Matches: external links and translations links
-        if( aLink.contains(",")) return true; // Matches: external links and translations links
-        if( aLink.contains("&")) return true;
-        
+        if( firstChar == '-')  return true;
+        if( firstChar == '{')  return true;
+       
         return false;
     }
 }
