@@ -13,14 +13,11 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
     private static final Pattern wikiLinksPattern = Pattern.compile("\\[.+?\\]");
     
     /**
-     * key - KEYIN
+     * key - KEYIN 
      * value - VALUEIN
      */
     protected void map(LongWritable key, Text value, Context context) 
     		throws IOException, InterruptedException {
-        
-    	
-    	System.out.println(value.toString().substring(0, 6));
     	
         String[] titleAndText = parseTitleAndText(value);
         
@@ -47,8 +44,7 @@ public class WikiPageLinksMapper extends Mapper<LongWritable, Text, Text, Text> 
             context.write(page, new Text(otherPage));
         }
     }
-    
-    
+       
     private boolean notValidPage(String pageString) {
         return pageString.contains(":");
     }
