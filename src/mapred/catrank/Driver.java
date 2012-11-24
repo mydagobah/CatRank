@@ -52,7 +52,7 @@ public class Driver {
 		Optimizedjob job = new Optimizedjob(conf, input, output, "Parse page info from xml files");
 		//FileInputFormat.setInputPaths(job, input);
 		job._setInputFormatClass(XmlInputFormat.class);
-		job.setClasses(WikiPageLinksMapper.class, WikiPageLinksReducer.class, null);
+		job.setClasses(PageParsingMapper.class, PageParsingReducer.class, null);
 		job.setMapOutputClasses(Text.class, Text.class);
 		job.run();	
 	}
@@ -68,7 +68,6 @@ public class Driver {
 		job._setInputFormatClass(TextInputFormat.class);
 		job.setClasses(RankCalculationMapper.class, RankCalculationReducer.class, null);
 		job.setMapOutputClasses(Text.class, Text.class);
-		//job.setReduceJobs(1);
 		job.run();	
 	}
 	
