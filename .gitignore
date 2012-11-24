@@ -1,5 +1,6 @@
 # ignore following files
 data/
 results/
+tmp/
 ./*.jar
 build/

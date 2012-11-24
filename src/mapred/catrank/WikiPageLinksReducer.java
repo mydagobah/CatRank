@@ -14,7 +14,7 @@ public class WikiPageLinksReducer extends Reducer<Text, Text, Text, Text> {
     	Iterator<Text> iter = values.iterator();  	
     	
         if (iter.hasNext()) pagelinks += iter.next().toString();
-           
+        
         while(iter.hasNext()){
             pagelinks += ",";      
             pagelinks += iter.next().toString();
