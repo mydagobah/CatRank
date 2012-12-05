@@ -3,8 +3,6 @@ package mapred.catrank;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.io.FloatWritable;
@@ -21,15 +19,14 @@ public class CatAccuReducer extends Reducer<Text, Text, FloatWritable, Text> {
 		Iterator<Text> iter = values.iterator();
 
 		while(iter.hasNext()){
-            		valueString = iter.next().toString();
+            valueString = iter.next().toString();
              
-            		try {
-			    	count += Float.parseFloat(valueString);
+            try {
+			    count += Float.parseFloat(valueString);
 			} catch (NumberFormatException nfe) {
 				continue;
 			}
-
-        	}
+		}
 		
 		context.write(new FloatWritable(count), key);
 	}

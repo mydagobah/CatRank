@@ -14,7 +14,7 @@ public class RankOrderingMapper extends Mapper<LongWritable, Text, Text, FloatWr
 
 		String[] pageAndRank = value.toString().split("\\s+");
         
-        context.write(new FloatWritable(Float.parseFloat(pageAndRank[1])), 
-        		      new Text(pageAndRank[0]));		
+        context.write(new Text(pageAndRank[0]), 
+        		      new FloatWritable(Float.parseFloat(pageAndRank[1])));		
 	}
 }

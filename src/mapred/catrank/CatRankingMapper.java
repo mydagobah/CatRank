@@ -17,10 +17,8 @@ public class CatRankingMapper extends Mapper<LongWritable, Text, Text, Text> {
 	String rankOrCats = Text.decode(value.getBytes(),pageTabIndex+1, value.getLength()-(pageTabIndex+1));
 
 	if (isNumeric(rankOrCats))
-		context.write(new Text(page), new Text("!"));
-	
-	context.write(new Text(page), new Text(rankOrCats));
-	
+		context.write(new Text(page), new Text("!"));	
+		context.write(new Text(page), new Text(rankOrCats));	
 	}
 
 	private boolean isNumeric(String str) {

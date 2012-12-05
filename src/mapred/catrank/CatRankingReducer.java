@@ -44,7 +44,6 @@ public class CatRankingReducer extends Reducer<Text, Text, Text, FloatWritable> 
 			if(!isExistingWikiPage) return;
 		
 			allCats = rankOrCatLists.split(",");
-			int totalCats = allCats.length;
 
 			FloatWritable rank = new FloatWritable(rank_f);
 
