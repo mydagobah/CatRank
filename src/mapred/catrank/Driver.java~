@@ -28,22 +28,22 @@ public class Driver {
 		String tmpdir = parser.get("tmpdir");
 
 		// job1
-		parseXml(input, tmpdir + "/run0");
+	/*	parseXml(input, tmpdir + "/run0");*/
 	
 		// job2 
-		int runs = 0;
+	/*	int runs = 0;
 		for(; runs < 5; runs++) {
 			calculateRank(tmpdir + "/run" + runs, tmpdir + "/run" + (runs + 1));
-		}
+		}*/
 		
 		// job3
-		orderRanks(tmpdir + "/run" + (runs), tmpdir + "/PRresult");
+	/*	orderRanks(tmpdir + "/run" + (runs), tmpdir + "/PRresult");*/
 
 		// job4
-		catParse(input, tmpdir + "/catParse");
+	/*	catParse(input, tmpdir + "/catParse");*/
 
 		// job5
-		catRanks(tmpdir + "/catParse", tmpdir + "/PRresult",  tmpdir + "/catCalc");
+	/*	catRanks(tmpdir + "/catParse", tmpdir + "/PRresult",  tmpdir + "/catCalc");*/
 
 		// job6
 		catAccumulate(tmpdir + "/catCalc", output);

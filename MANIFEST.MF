@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_24-b24 (Sun Microsystems Inc.)
+Built-By: an
+Main-Class: mapred.main.Entry
+Implementation-Version: 0.1-b1381
+Built-Date: 2012-12-04 18:36:44
+
