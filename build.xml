@@ -14,7 +14,7 @@
   <property name="build" location="build"/> 
   <property name="dist" location="."/>
   <property name="version.num" value="0.1"/>
-  <property name="project.name" value="18645-proj4"/>
+  <property name="project.name" value="catrank"/>
   <buildnumber file="build.num"/>
 
   <path id="classpath">
@@ -53,7 +53,7 @@
         value="${version.num}-b${build.number}"/> 
       <attribute name="Built-Date" value="${TODAY}"/>       
     </manifest>
-    <property name="build.jar" location="${dist}/${project.name}-${version.num}-latest.jar"/>
+    <property name="build.jar" location="${dist}/${project.name}.jar"/>
     <jar jarfile="${build.jar}" basedir="${build}" manifest="MANIFEST.MF"/>
   </target>
 

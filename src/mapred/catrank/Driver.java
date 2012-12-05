@@ -44,33 +44,50 @@ public class Driver {
 		
 		// setup configuration
 		Configuration conf = new Configuration();
+		
+		// Optimization
+		//conf.setInt("mapred.map.tasks", 16);
+		//conf.setInt("mapred.block.size", 268435456); // blk size = 256 M
+		//conf.setInt("mapred.max.split.size", 536870912);
+		conf.setInt("mapred.min.split.size", 134217728); // min 128M
+		conf.setBoolean("mapred.compress.map.output", true); // compression
+		
+		
+		// select the <page> tag 
 		conf.set(XmlInputFormat.START_TAG_KEY, "<page>");
 		conf.set(XmlInputFormat.END_TAG_KEY, "</page>");
 		//conf.set("io.serializations", "org.apache.hadoop.io.serializer.JavaSerialization,org.apache.hadoop.io.serializer.WritableSerialization");
 				
 		// setup job		
 		Optimizedjob job = new Optimizedjob(conf, input, output, "Parse page info from xml files");
-		//FileInputFormat.setInputPaths(job, input);
 		job._setInputFormatClass(XmlInputFormat.class);
-		job.setClasses(PageParsingMapper.class, PageParsingReducer.class, null);
+		job.setClasses(PageParsingMapper.class, PageParsingReducer.class, PageParsingCombiner.class);
 		job.setMapOutputClasses(Text.class, Text.class);
 		job.run();	
 	}
 	
+	/*
+	 * Mapreduce Job 2 - calculate page ranks iteratively
+	 */
 	private static void calculateRank(String input, String output) 
 			throws IOException, ClassNotFoundException, InterruptedException {
 			
 		Configuration conf = new Configuration();
+		conf.setInt("mapred.min.split.size", 134217728);
+		//conf.setInt("mapred.inmem.merge.threshold", 0);
+		//conf.setFloat("mapred.job.reduce.input.buffer.percent", 1.0f);
 		
 		// setup job		
-		Optimizedjob job = new Optimizedjob(conf, input, output, "Calculate page ranks");
-		
+		Optimizedjob job = new Optimizedjob(conf, input, output, "Calculate page ranks");		
 		job._setInputFormatClass(TextInputFormat.class);
 		job.setClasses(RankCalculationMapper.class, RankCalculationReducer.class, null);
 		job.setMapOutputClasses(Text.class, Text.class);
 		job.run();	
 	}
 	
+	/*
+	 * Mapreduce Job 3 - output the page ranks in order
+	 */
 	private static void orderRanks(String input, String output) 
 			throws IOException, ClassNotFoundException, InterruptedException {
 		Configuration conf = new Configuration();

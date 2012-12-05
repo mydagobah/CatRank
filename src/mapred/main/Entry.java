@@ -7,7 +7,7 @@ import mapred.util.SimpleParser;
  * 1. check program name
  * 2. calculate the runtime
  * Usage:
- * hadoop jar 18645-proj4-0.1-latest.jar -program catrank -input data/ -output results -tmpdir tmp
+ * hadoop jar 18645-proj4-0.1-latest.jar -program catrank -input data/ -output results -tmpdir tmp -n 5
  */
 public class Entry {
 	public static void main(String args[]) throws Exception  {

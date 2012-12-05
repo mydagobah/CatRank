@@ -26,17 +26,13 @@ public class RankCalculationReducer extends Reducer<Text, Text, Text, Text> {
         while(iter.hasNext()){
             pageWithRank = iter.next().toString();
              
-            if(pageWithRank.equals("!")) {
+            if(pageWithRank.startsWith("|")){
+                links = "\t"+pageWithRank.substring(1);
                 isExistingWikiPage = true;
                 continue;
             }
-             
-            if(pageWithRank.startsWith("|")){
-                links = "\t"+pageWithRank.substring(1);
-                continue;
-            }
  
-            split = pageWithRank.split("\\t");
+            split = pageWithRank.split("\\s+");
             
             float pageRank;
             int countOutLinks;
