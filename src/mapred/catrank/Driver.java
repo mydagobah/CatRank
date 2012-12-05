@@ -9,6 +9,10 @@ import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.JobConf;
+
 public class Driver {
 
 	/**
@@ -33,7 +37,17 @@ public class Driver {
 		}
 		
 		// job3
-		orderRanks(tmpdir + "/run" + (runs), output);
+		orderRanks(tmpdir + "/run" + (runs), tmpdir + "/PRresult");
+
+		// job4
+		catParse(input, tmpdir + "/catParse");
+
+		// job5
+		catRanks(tmpdir + "/catParse", tmpdir + "/PRresult",  tmpdir + "/catCalc");
+
+		// job6
+		catAccumulate(tmpdir + "/catCalc", output);
+
 	}
 
 	/*
@@ -69,6 +83,7 @@ public class Driver {
 	/*
 	 * Mapreduce Job 2 - calculate page ranks iteratively
 	 */
+
 	private static void calculateRank(String input, String output) 
 			throws IOException, ClassNotFoundException, InterruptedException {
 			
@@ -97,9 +112,63 @@ public class Driver {
 		
 		job._setInputFormatClass(TextInputFormat.class);
 		job.setClasses(RankOrderingMapper.class, null, null);
-		job.setMapOutputClasses(FloatWritable.class, Text.class);
+		job.setMapOutputClasses(Text.class, FloatWritable.class);
 		job.setReduceJobs(1);
 		job.run();	
 	}
+
+	/*
+	 * Mapreduce Job 4 
+	 */
+	private static void catParse(String input, String output) 
+			throws IOException, ClassNotFoundException, InterruptedException {
+		Configuration conf = new Configuration();
+		conf.set(XmlInputFormat.START_TAG_KEY, "<page>");
+		conf.set(XmlInputFormat.END_TAG_KEY, "</page>");
+
+		// setup job		
+		Optimizedjob job = new Optimizedjob(conf, input, output, "Parse category info from xml files");
+		
+		job._setInputFormatClass(XmlInputFormat.class);
+		job.setClasses(CatParsingMapper.class, CatParsingReducer.class, null);
+		job.setMapOutputClasses(Text.class, Text.class);
+		job.run();	
+	}
+
+	/*
+	 * Mapreduce Job 5 
+	 */
+	private static void catRanks(String input, String rankfile, String output) 
+			throws IOException, ClassNotFoundException, InterruptedException {
+		Configuration conf = new Configuration();
+		JobConf jobconf = new JobConf(conf);
+		FileInputFormat.addInputPath(jobconf, new Path(rankfile));
+
+		// setup job		
+		Optimizedjob job = new Optimizedjob(jobconf, input, output, "Order category ranks");
+		
+		job._setInputFormatClass(TextInputFormat.class);
+		job.setClasses(CatRankingMapper.class, CatRankingReducer.class, null);
+		job.setMapOutputClasses(Text.class, Text.class);
+		job.run();	
+	}
+
+	/*
+	 * Mapreduce Job 6
+	 */
+	private static void catAccumulate(String input, String output) 
+			throws IOException, ClassNotFoundException, InterruptedException {
+		Configuration conf = new Configuration();
+		
+		// setup job		
+		Optimizedjob job = new Optimizedjob(conf, input, output, "Calculate category rank");
+		
+		job._setInputFormatClass(TextInputFormat.class);
+		job.setClasses(CatAccuMapper.class, CatAccuReducer.class, null);
+		job.setMapOutputClasses(Text.class, Text.class);
+		job.setReduceJobs(1);
+		job.run();	
+	}
+
 	
 }
